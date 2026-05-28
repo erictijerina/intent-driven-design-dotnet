@@ -147,8 +147,5 @@ In `CoreServicesConfigurator`, register your stores and infrastructure services.
 
 ## Conventions to Preserve
 
-- **DTOs belong in `Application/Dtos/`** — never in the Api project
-- **Composition root files are `*Configurator.cs`** — not `*ServiceCollectionExtensions`
-- **Tier-2 handler folder is `Orchestration/`** — not `Commands/`
-- **No injected services in controllers** — only `IMapper` is acceptable; business operations go through the aggregate facade
-- **Both runtimes configure AND clear in the same middleware lambda** — no standalone middleware class
+- **DTOs belong in `Application/Dtos/`** — never in the Api/Domain projects
+- tbd..
