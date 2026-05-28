@@ -23,7 +23,7 @@ Acme.Domain/
 Acme.Application/
   Dtos/Order/            Request/response shapes (never in Api)
   UseCases/Order/
-    Orchestration/       Tier-2 handlers (invariants, multi-step, events)
+    Orchestration/       Tier-2 and Tier-3 handlers
     Events/              Domain event handlers
   PipelineBehaviors/     LoggingBehavior
   Contracts/             IOrderStore
@@ -91,9 +91,10 @@ app.Use(async (context, next) =>
 | Tier | Layer | Purpose |
 |---|---|---|
 | Tier-1 | Infrastructure | Simple reads/writes — no business logic, no events |
-| Tier-2 | Application/Orchestration | Invariants, domain events, multi-step coordination |
+| Tier-2 | Application/Orchestration | Invariants, domain events, single-aggregate coordination |
+| Tier-3 | Application/Orchestration (Workflow) | Cross-aggregate, multi-step — coordinates other intents via the facade |
 
-Tier-2 handlers live in `UseCases/{Aggregate}/Orchestration/`. Tier-1 handlers live under `Infrastructure/Database/` or `Infrastructure/Messaging/`.
+All handler tiers live in `UseCases/{Aggregate}/Orchestration/`. Tier-1 handlers live under `Infrastructure/Database/` or `Infrastructure/Messaging/`.
 
 ---
 
@@ -127,7 +128,7 @@ Domain/{Aggregate}/
 Application/
   Dtos/{Aggregate}/           — raw input DTOs, response DTOs
   UseCases/{Aggregate}/
-    Orchestration/            — Tier-2 IRequestHandler<,> implementations
+    Orchestration/            — Tier-2 and Tier-3 IRequestHandler<,> implementations
     Events/                   — INotificationHandler<> implementations
   Contracts/                  — I{Aggregate}Store interface
 
@@ -147,5 +148,8 @@ In `CoreServicesConfigurator`, register your stores and infrastructure services.
 
 ## Conventions to Preserve
 
-- **DTOs belong in `Application/Dtos/`** — never in the Api/Domain projects
-- tbd..
+- **DTOs belong in `Application/Dtos/`** — never in the Api project
+- **Composition root files are `*Configurator.cs`** — not `*ServiceCollectionExtensions`
+- **Tier-2/3 handler folder is `Orchestration/`** — not `Commands/`
+- **No domain services injected in controllers** — business operations route through the aggregate facade; infrastructure concerns (authservice, mapping, logging, etc.) are acceptable
+- **Both runtimes configure AND clear in the same middleware lambda** — no standalone middleware class
